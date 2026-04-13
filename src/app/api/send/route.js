@@ -9,15 +9,27 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Bitte füllen Sie alle Felder aus.' }, { status: 400 });
     }
 
-    // Configure Nodemailer transporter
+    // Debug: check env vars are loaded
+    const host = process.env.SMTP_HOST;
+    const port = Number(process.env.SMTP_PORT);
+    const user = process.env.SMTP_USER;
+    const pass = process.env.SMTP_PASS;
+
+    console.log('SMTP Config:', { host, port, user: user ? '✓' : '✗', pass: pass ? '✓' : '✗' });
+
+    if (!host || !port || !user || !pass) {
+      return NextResponse.json({ error: 'SMTP Konfiguration fehlt. Bitte Environment Variables prüfen.' }, { status: 500 });
+    }
+
+    // Configure Nodemailer transporter with timeouts
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT),
+      host,
+      port,
       secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
+      auth: { user, pass },
+      connectionTimeout: 8000,
+      greetingTimeout: 8000,
+      socketTimeout: 8000,
     });
 
     const formatText = (text) => {
