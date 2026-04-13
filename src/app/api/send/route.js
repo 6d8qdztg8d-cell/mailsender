@@ -22,10 +22,12 @@ export async function POST(req) {
     }
 
     // Configure Nodemailer transporter with timeouts
+    // Vercel blocks port 465, use 587 with STARTTLS instead
     const transporter = nodemailer.createTransport({
       host,
-      port,
-      secure: process.env.SMTP_SECURE === 'true',
+      port: 587,
+      secure: false,
+      requireTLS: true,
       auth: { user, pass },
       connectionTimeout: 8000,
       greetingTimeout: 8000,
