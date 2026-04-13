@@ -1,10 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic';
-import 'react-quill/dist/quill.snow.css';
-
-// Dynamically import Quill to avoid SSR issues
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+import RichEditor from './components/RichEditor';
 
 const DEFAULT_SUBJECT = 'Potenzial für Ihre Website';
 const DEFAULT_MESSAGE = `<p>Guten Tag Herr/Frau</p><br><p>Ich bin auf Ihr Unternehmen gestossen und habe mir Ihre Website kurz angeschaut.</p><br><p>Dabei ist mir aufgefallen, dass Ihre Website eine gute Grundlage bietet, mit gezielten Anpassungen jedoch noch klarer, moderner und kundenfreundlicher wirken könnte – insbesondere für Interessenten, die Sie erstmals online finden.</p><br><p>Bei digitalframe.ch gestalten wir Websites, die <strong style="color: #376616;">BEWEGEN</strong>.</p><p>Wir verbinden modernes Webdesign, saubere technische Umsetzung und klare Inhalte zu einem Online Auftritt, der überzeugt – und dafür sorgt, dass aus Besuchern neue Kunden werden.</p><br><p>Gerne gebe ich Ihnen eine kurze, unverbindliche Einschätzung, wo konkret Optimierungspotenzial besteht.</p><br><p>Falls das für Sie interessant klingt, freue ich mich über Ihre Rückmeldung.</p>`;
@@ -18,12 +14,9 @@ digitalframe.ch
 
 export default function Home() {
   const [recipient, setRecipient] = useState('');
-  
-  // Settings / Templates
   const [subject, setSubject] = useState(DEFAULT_SUBJECT);
   const [messageTemplate, setMessageTemplate] = useState(DEFAULT_MESSAGE);
   const [footerTemplate, setFooterTemplate] = useState(DEFAULT_FOOTER);
-  
   const [showSettings, setShowSettings] = useState(false);
   const [status, setStatus] = useState({ type: '', text: '' });
   const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +25,6 @@ export default function Home() {
     const savedSubject = localStorage.getItem('df_subject');
     const savedMsg = localStorage.getItem('df_message');
     const savedFooter = localStorage.getItem('df_footer');
-    
     if (savedSubject) setSubject(savedSubject);
     if (savedMsg) setMessageTemplate(savedMsg);
     if (savedFooter) setFooterTemplate(savedFooter);
@@ -50,7 +42,6 @@ export default function Home() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!recipient) return;
-    
     setIsLoading(true);
     setStatus({ type: '', text: '' });
 
@@ -67,7 +58,6 @@ export default function Home() {
       });
 
       const data = await response.json();
-
       if (response.ok) {
         setStatus({ type: 'success', text: 'E-Mail erfolgreich versendet!' });
         setRecipient('');
@@ -79,18 +69,6 @@ export default function Home() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Editor modules (Toolbar options)
-  const modules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'color': [] }, { 'background': [] }],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      ['link'],
-      ['clean']
-    ],
   };
 
   return (
@@ -129,9 +107,7 @@ export default function Home() {
                 VERARBEITEN...
               </>
             ) : (
-              <>
-                SENDEN ➔
-              </>
+              <>SENDEN ➔</>
             )}
           </button>
         </form>
@@ -157,18 +133,10 @@ export default function Home() {
             onChange={(e) => setSubject(e.target.value)}
           />
         </div>
-        
+
         <div className="form-group">
-          <label className="form-label">Hauptnachricht (Editor)</label>
-          <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', overflow: 'hidden' }}>
-            <ReactQuill 
-              theme="snow" 
-              value={messageTemplate} 
-              onChange={setMessageTemplate} 
-              modules={modules}
-              style={{ height: '300px', marginBottom: '40px' }}
-            />
-          </div>
+          <label className="form-label">Hauptnachricht</label>
+          <RichEditor value={messageTemplate} onChange={setMessageTemplate} />
         </div>
 
         <div className="form-group">
@@ -181,7 +149,7 @@ export default function Home() {
           />
         </div>
 
-        <button className="submit-btn" onClick={saveSettings} style={{ background: 'var(--text-primary)', color: 'white', padding: '0.8rem 1.5rem' }}>
+        <button type="button" className="submit-btn" onClick={saveSettings} style={{ background: 'var(--text-primary)', color: 'white', padding: '0.8rem 1.5rem' }}>
           Vorlagen Speichern
         </button>
       </div>

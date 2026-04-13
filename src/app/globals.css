@@ -240,6 +240,130 @@ body::before {
   color: var(--error);
 }
 
+/* ─── Rich Text Editor ─── */
+.rich-editor-wrapper {
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface-color);
+}
+
+.rich-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 12px;
+  background: #f0f0ee;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 24px;
+  background: #ccc;
+  margin: 0 4px;
+}
+
+.toolbar-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: all 0.15s ease;
+}
+
+.toolbar-btn:hover {
+  background: #e0e0de;
+  border-color: #ccc;
+}
+
+.toolbar-select {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background: white;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+.color-picker-wrap {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.color-label {
+  font-weight: 700;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.color-picker-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.color-swatches {
+  display: flex;
+  gap: 3px;
+}
+
+.color-swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  border: 1px solid rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  padding: 0;
+}
+
+.color-swatch:hover {
+  transform: scale(1.3);
+}
+
+.rich-editable {
+  min-height: 280px;
+  padding: 20px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  outline: none;
+  overflow-y: auto;
+}
+
+.rich-editable p {
+  margin: 0 0 8px 0;
+}
+
+.rich-editable:focus {
+  box-shadow: inset 0 0 0 2px rgba(55, 102, 22, 0.15);
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
