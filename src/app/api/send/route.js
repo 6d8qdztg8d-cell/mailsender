@@ -70,8 +70,8 @@ export async function POST(req) {
                 
                 <!-- Body Content -->
                 <tr>
-                  <td style="padding: 40px 40px 20px 40px;">
-                    ${formatText(message)}
+                  <td style="padding: 40px 40px 20px 40px; font-size: 15px; line-height: 1.6; color: #333333;">
+                    ${message}
                   </td>
                 </tr>
                 

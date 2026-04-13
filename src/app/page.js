@@ -1,19 +1,13 @@
 'use client';
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+import 'react-quill/dist/quill.snow.css';
+
+// Dynamically import Quill to avoid SSR issues
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
 const DEFAULT_SUBJECT = 'Potenzial für Ihre Website';
-const DEFAULT_MESSAGE = `Guten Tag Herr/Frau
-
-Ich bin auf Ihr Unternehmen gestossen und habe mir Ihre Website kurz angschaut.
-
-Dabei ist mir aufgefallen, dass Ihre Website eine gute Grundlage bietet, mit gezielten Anpassungen jedoch noch klarer, moderner und kundenfreundlicher wirken könnte – insbesondere für Interessenten, die Sie erstmals online finden.
-
-Bei digitalframe.ch gestalten wir Websites, die BEWEGEN.
-Wir verbinden modernes Webdesign, saubere technische Umsetzung und klare Inhalte zu einem Online Auftritt, der überzeugt – und dafür sorgt, dass aus Besuchern neue Kunden werden.
-
-Gerne gebe ich Ihnen eine kurze, unverbindliche Einschätzung, wo konkret Optimierungspotenzial besteht.
-
-Falls das für Sie interessant klingt, freue ich mich über Ihre Rückmeldung.`;
+const DEFAULT_MESSAGE = `<p>Guten Tag Herr/Frau</p><br><p>Ich bin auf Ihr Unternehmen gestossen und habe mir Ihre Website kurz angeschaut.</p><br><p>Dabei ist mir aufgefallen, dass Ihre Website eine gute Grundlage bietet, mit gezielten Anpassungen jedoch noch klarer, moderner und kundenfreundlicher wirken könnte – insbesondere für Interessenten, die Sie erstmals online finden.</p><br><p>Bei digitalframe.ch gestalten wir Websites, die <strong style="color: #376616;">BEWEGEN</strong>.</p><p>Wir verbinden modernes Webdesign, saubere technische Umsetzung und klare Inhalte zu einem Online Auftritt, der überzeugt – und dafür sorgt, dass aus Besuchern neue Kunden werden.</p><br><p>Gerne gebe ich Ihnen eine kurze, unverbindliche Einschätzung, wo konkret Optimierungspotenzial besteht.</p><br><p>Falls das für Sie interessant klingt, freue ich mich über Ihre Rückmeldung.</p>`;
 
 const DEFAULT_FOOTER = `Freundliche Grüsse
 
@@ -35,7 +29,6 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Load saved settings from localStorage if they exist
     const savedSubject = localStorage.getItem('df_subject');
     const savedMsg = localStorage.getItem('df_message');
     const savedFooter = localStorage.getItem('df_footer');
@@ -77,7 +70,7 @@ export default function Home() {
 
       if (response.ok) {
         setStatus({ type: 'success', text: 'E-Mail erfolgreich versendet!' });
-        setRecipient(''); // Clear recipient to be ready for the next one
+        setRecipient('');
       } else {
         setStatus({ type: 'error', text: data.error || 'Fehler beim Senden der E-Mail.' });
       }
@@ -86,6 +79,18 @@ export default function Home() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Editor modules (Toolbar options)
+  const modules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      ['link'],
+      ['clean']
+    ],
   };
 
   return (
@@ -154,12 +159,16 @@ export default function Home() {
         </div>
         
         <div className="form-group">
-          <label className="form-label">Hauptnachricht</label>
-          <textarea
-            className="form-textarea"
-            value={messageTemplate}
-            onChange={(e) => setMessageTemplate(e.target.value)}
-          />
+          <label className="form-label">Hauptnachricht (Editor)</label>
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', overflow: 'hidden' }}>
+            <ReactQuill 
+              theme="snow" 
+              value={messageTemplate} 
+              onChange={setMessageTemplate} 
+              modules={modules}
+              style={{ height: '300px', marginBottom: '40px' }}
+            />
+          </div>
         </div>
 
         <div className="form-group">
