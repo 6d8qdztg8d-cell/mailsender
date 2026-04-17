@@ -4,39 +4,42 @@ import RichEditor from './components/RichEditor';
 
 const DEFAULT_SUBJECT = 'Potenzial für Ihre Website';
 const DEFAULT_MESSAGE = `<p>Guten Tag Herr/Frau</p><br><p>Ich bin auf Ihr Unternehmen gestossen und habe mir Ihre Website kurz angeschaut.</p><br><p>Dabei ist mir aufgefallen, dass Ihre Website eine gute Grundlage bietet, mit gezielten Anpassungen jedoch noch klarer, moderner und kundenfreundlicher wirken könnte – insbesondere für Interessenten, die Sie erstmals online finden.</p><br><p>Bei digitalframe.ch gestalten wir Websites, die <strong style="color: #376616;">BEWEGEN</strong>.</p><p>Wir verbinden modernes Webdesign, saubere technische Umsetzung und klare Inhalte zu einem Online Auftritt, der überzeugt – und dafür sorgt, dass aus Besuchern neue Kunden werden.</p><br><p>Gerne gebe ich Ihnen eine kurze, unverbindliche Einschätzung, wo konkret Optimierungspotenzial besteht.</p><br><p>Falls das für Sie interessant klingt, freue ich mich über Ihre Rückmeldung.</p>`;
-
-const DEFAULT_FOOTER = `Freundliche Grüsse
-
-Raul Goncalves
-Business Developer
-digitalframe.ch
-076 297 49 26`;
+const DEFAULT_FOOTER = `Freundliche Grüsse\n\nRaul Goncalves\nBusiness Developer\ndigitalframe.ch\n076 297 49 26`;
 
 export default function Home() {
   const [recipient, setRecipient] = useState('');
   const [subject, setSubject] = useState(DEFAULT_SUBJECT);
-  const [messageTemplate, setMessageTemplate] = useState(DEFAULT_MESSAGE);
-  const [footerTemplate, setFooterTemplate] = useState(DEFAULT_FOOTER);
+  const [message, setMessage] = useState(DEFAULT_MESSAGE);
+  const [footer, setFooter] = useState(DEFAULT_FOOTER);
   const [showSettings, setShowSettings] = useState(false);
   const [status, setStatus] = useState({ type: '', text: '' });
   const [isLoading, setIsLoading] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    const savedSubject = localStorage.getItem('df_subject');
-    const savedMsg = localStorage.getItem('df_message');
-    const savedFooter = localStorage.getItem('df_footer');
-    if (savedSubject) setSubject(savedSubject);
-    if (savedMsg) setMessageTemplate(savedMsg);
-    if (savedFooter) setFooterTemplate(savedFooter);
+    const s = localStorage.getItem('df_subject');
+    const m = localStorage.getItem('df_message');
+    const f = localStorage.getItem('df_footer');
+    if (s) setSubject(s);
+    if (m) setMessage(m);
+    if (f) setFooter(f);
   }, []);
 
   const saveSettings = () => {
     localStorage.setItem('df_subject', subject);
-    localStorage.setItem('df_message', messageTemplate);
-    localStorage.setItem('df_footer', footerTemplate);
-    setShowSettings(false);
-    setStatus({ type: 'success', text: 'Einstellungen gespeichert!' });
-    setTimeout(() => setStatus({ type: '', text: '' }), 3000);
+    localStorage.setItem('df_message', message);
+    localStorage.setItem('df_footer', footer);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2500);
+  };
+
+  const resetDefaults = () => {
+    setSubject(DEFAULT_SUBJECT);
+    setMessage(DEFAULT_MESSAGE);
+    setFooter(DEFAULT_FOOTER);
+    localStorage.removeItem('df_subject');
+    localStorage.removeItem('df_message');
+    localStorage.removeItem('df_footer');
   };
 
   const handleSubmit = async (e) => {
@@ -44,28 +47,21 @@ export default function Home() {
     if (!recipient) return;
     setIsLoading(true);
     setStatus({ type: '', text: '' });
-
     try {
-      const response = await fetch('/api/send', {
+      const res = await fetch('/api/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          recipient,
-          subject,
-          message: messageTemplate,
-          footer: footerTemplate
-        }),
+        body: JSON.stringify({ recipient, subject, message, footer }),
       });
-
-      const data = await response.json();
-      if (response.ok) {
-        setStatus({ type: 'success', text: 'E-Mail erfolgreich versendet!' });
+      const data = await res.json();
+      if (res.ok) {
+        setStatus({ type: 'success', text: `✓ E-Mail an ${recipient} versendet!` });
         setRecipient('');
       } else {
-        setStatus({ type: 'error', text: data.error || 'Fehler beim Senden der E-Mail.' });
+        setStatus({ type: 'error', text: data.error || 'Fehler beim Senden.' });
       }
-    } catch (error) {
-      setStatus({ type: 'error', text: 'Netzwerkfehler. Bitte versuche es später.' });
+    } catch {
+      setStatus({ type: 'error', text: 'Netzwerkfehler. Bitte erneut versuchen.' });
     } finally {
       setIsLoading(false);
     }
@@ -73,86 +69,103 @@ export default function Home() {
 
   return (
     <main className="container">
+      {/* Header */}
       <div className="header">
         <div className="brand-tag">DIGITALFRAME</div>
-        <h1 className="title">
-          E-Mails<br/>
-          die <span className="title-highlight">bewegen.</span>
-        </h1>
+        <h1 className="title">E-Mails<br/>die <span className="title-highlight">bewegen.</span></h1>
         <p className="subtitle">
           Versende personalisierte Akquise-Mails direkt aus diesem Tool. Text und Design sind bereits auf <b>digitalframe.ch</b> abgestimmt.
         </p>
       </div>
 
+      {/* Send Panel */}
       <div className="main-panel">
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label className="form-label" htmlFor="recipient">Empfänger E-Mail Adresse</label>
+            <label className="form-label" htmlFor="recipient">Empfänger E-Mail</label>
             <input
               type="email"
               id="recipient"
               className="form-input"
               value={recipient}
-              onChange={(e) => setRecipient(e.target.value)}
-              placeholder="ziel@unternehmen.ch"
+              onChange={e => setRecipient(e.target.value)}
+              placeholder="kontakt@unternehmen.ch"
               required
-              style={{ fontSize: '1.2rem', padding: '1.2rem' }}
+              style={{ fontSize: '1.1rem', padding: '1rem 1.2rem' }}
             />
           </div>
-
           <button type="submit" className="submit-btn" disabled={isLoading}>
-            {isLoading ? (
-              <>
-                <div className="spinner"></div>
-                VERARBEITEN...
-              </>
-            ) : (
-              <>SENDEN ➔</>
-            )}
+            {isLoading ? <><div className="spinner" />VERARBEITEN...</> : <>SENDEN ➔</>}
           </button>
         </form>
-
         {status.text && (
-          <div className={`status-message status-${status.type}`}>
-            {status.text}
-          </div>
+          <div className={`status-message status-${status.type}`}>{status.text}</div>
         )}
       </div>
 
-      <button className="toggle-settings" onClick={() => setShowSettings(!showSettings)} type="button">
-        {showSettings ? '▲ Einstellungen schließen' : '▼ Einstellungen & Vorlagen bearbeiten'}
+      {/* Settings Toggle */}
+      <button
+        className="toggle-settings"
+        onClick={() => setShowSettings(v => !v)}
+        type="button"
+      >
+        <span className="toggle-icon">{showSettings ? '▲' : '▼'}</span>
+        Einstellungen & Vorlagen
       </button>
 
-      <div className={`settings-panel ${showSettings ? 'active' : ''}`}>
-        <div className="form-group">
-          <label className="form-label">E-Mail Betreff</label>
-          <input
-            type="text"
-            className="form-input"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-          />
-        </div>
+      {/* Settings Panel */}
+      {showSettings && (
+        <div className="settings-panel">
+          {/* Section: Betreff */}
+          <div className="settings-section">
+            <div className="settings-section-header">
+              <span className="settings-section-icon">✉</span>
+              <span>Betreff</span>
+            </div>
+            <input
+              type="text"
+              className="form-input"
+              value={subject}
+              onChange={e => setSubject(e.target.value)}
+              placeholder="E-Mail Betreff..."
+            />
+          </div>
 
-        <div className="form-group">
-          <label className="form-label">Hauptnachricht</label>
-          <RichEditor value={messageTemplate} onChange={setMessageTemplate} />
-        </div>
+          {/* Section: Nachricht */}
+          <div className="settings-section">
+            <div className="settings-section-header">
+              <span className="settings-section-icon">✍</span>
+              <span>Hauptnachricht</span>
+            </div>
+            <RichEditor value={message} onChange={setMessage} />
+          </div>
 
-        <div className="form-group">
-          <label className="form-label">Signatur / Footer</label>
-          <textarea
-            className="form-textarea"
-            style={{ minHeight: '120px' }}
-            value={footerTemplate}
-            onChange={(e) => setFooterTemplate(e.target.value)}
-          />
-        </div>
+          {/* Section: Signatur */}
+          <div className="settings-section">
+            <div className="settings-section-header">
+              <span className="settings-section-icon">✒</span>
+              <span>Signatur</span>
+            </div>
+            <p className="settings-hint">Zeile 1: Abschlussgruss · Zeile 2: Name · Zeile 3: Titel · weitere Zeilen: Kontakt</p>
+            <textarea
+              className="form-input"
+              style={{ minHeight: '130px', resize: 'vertical', lineHeight: 1.7 }}
+              value={footer}
+              onChange={e => setFooter(e.target.value)}
+            />
+          </div>
 
-        <button type="button" className="submit-btn" onClick={saveSettings} style={{ background: 'var(--text-primary)', color: 'white', padding: '0.8rem 1.5rem' }}>
-          Vorlagen Speichern
-        </button>
-      </div>
+          {/* Actions */}
+          <div className="settings-actions">
+            <button type="button" className="submit-btn" onClick={saveSettings}>
+              {saved ? '✓ Gespeichert!' : 'SPEICHERN'}
+            </button>
+            <button type="button" className="reset-btn" onClick={resetDefaults}>
+              Zurücksetzen
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
