@@ -52,11 +52,10 @@ export default function Home() {
     setIsLoading(true);
     setStatus({ type: '', text: '' });
     try {
+      const vals = { '{Name}': recipientName, '{Firma}': recipientFirma, '{Website}': recipientWebsite, '{Branche}': recipientBranche };
       const fillVars = (text) => text
-        .replaceAll('{Name}', recipientName || '{Name}')
-        .replaceAll('{Firma}', recipientFirma || '{Firma}')
-        .replaceAll('{Website}', recipientWebsite || '{Website}')
-        .replaceAll('{Branche}', recipientBranche || '{Branche}');
+        .replace(/<span[^>]*>\{(Name|Firma|Website|Branche)\}<\/span>/g, (_, k) => vals[`{${k}}`] || `{${k}}`)
+        .replace(/\{(Name|Firma|Website|Branche)\}/g, (_, k) => vals[`{${k}}`] || `{${k}}`);
 
       const res = await fetch('/api/send', {
         method: 'POST',
