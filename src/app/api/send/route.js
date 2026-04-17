@@ -9,29 +9,15 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Bitte füllen Sie alle Felder aus.' }, { status: 400 });
     }
 
-    // Debug: check env vars are loaded
-    const host = process.env.SMTP_HOST;
-    const port = Number(process.env.SMTP_PORT);
-    const user = process.env.SMTP_USER;
-    const pass = process.env.SMTP_PASS;
-
-    console.log('SMTP Config:', { host, port, user: user ? '✓' : '✗', pass: pass ? '✓' : '✗' });
-
-    if (!host || !port || !user || !pass) {
-      return NextResponse.json({ error: 'SMTP Konfiguration fehlt. Bitte Environment Variables prüfen.' }, { status: 500 });
-    }
-
-    // Configure Nodemailer transporter with timeouts
-    // Vercel blocks port 465, use 587 with STARTTLS instead
+    // Configure Nodemailer transporter
     const transporter = nodemailer.createTransport({
-      host,
-      port: 587,
-      secure: false,
-      requireTLS: true,
-      auth: { user, pass },
-      connectionTimeout: 8000,
-      greetingTimeout: 8000,
-      socketTimeout: 8000,
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT),
+      secure: process.env.SMTP_SECURE === 'true',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
     });
 
     const formatText = (text) => {
@@ -47,7 +33,7 @@ export async function POST(req) {
       if (lines.length < 3) {
         return lines.map(l => `<p style="margin: 0 0 4px 0; font-size: 14px; color: #111;">${l}</p>`).join('');
       }
-      
+
       const greeting = lines[0];
       const name = lines[1];
       const title = lines[2];
