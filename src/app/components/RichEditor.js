@@ -33,7 +33,7 @@ export default function RichEditor({ value, onChange }) {
   const savedRange = useRef(null);
 
   useEffect(() => {
-    if (editorRef.current && !isUserEditing.current) {
+    if (editorRef.current && editorRef.current.innerHTML !== (value || '')) {
       editorRef.current.innerHTML = value || '';
       updateWordCount();
     }
