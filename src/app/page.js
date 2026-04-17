@@ -8,6 +8,10 @@ const DEFAULT_FOOTER = `Freundliche Grüsse\n\nRaul Goncalves\nBusiness Develope
 
 export default function Home() {
   const [recipient, setRecipient] = useState('');
+  const [recipientName, setRecipientName] = useState('');
+  const [recipientFirma, setRecipientFirma] = useState('');
+  const [recipientWebsite, setRecipientWebsite] = useState('');
+  const [recipientBranche, setRecipientBranche] = useState('');
   const [subject, setSubject] = useState(DEFAULT_SUBJECT);
   const [message, setMessage] = useState(DEFAULT_MESSAGE);
   const [footer, setFooter] = useState(DEFAULT_FOOTER);
@@ -48,15 +52,25 @@ export default function Home() {
     setIsLoading(true);
     setStatus({ type: '', text: '' });
     try {
+      const fillVars = (text) => text
+        .replaceAll('{Name}', recipientName || '{Name}')
+        .replaceAll('{Firma}', recipientFirma || '{Firma}')
+        .replaceAll('{Website}', recipientWebsite || '{Website}')
+        .replaceAll('{Branche}', recipientBranche || '{Branche}');
+
       const res = await fetch('/api/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipient, subject, message, footer }),
+        body: JSON.stringify({ recipient, subject: fillVars(subject), message: fillVars(message), footer }),
       });
       const data = await res.json();
       if (res.ok) {
         setStatus({ type: 'success', text: `✓ E-Mail an ${recipient} versendet!` });
         setRecipient('');
+        setRecipientName('');
+        setRecipientFirma('');
+        setRecipientWebsite('');
+        setRecipientBranche('');
       } else {
         setStatus({ type: 'error', text: data.error || 'Fehler beim Senden.' });
       }
@@ -93,6 +107,24 @@ export default function Home() {
               required
               style={{ fontSize: '1.1rem', padding: '1rem 1.2rem' }}
             />
+          </div>
+          <div className="var-fields">
+            <div className="var-field">
+              <label className="var-label">Name</label>
+              <input className="form-input" type="text" value={recipientName} onChange={e => setRecipientName(e.target.value)} placeholder="Max Muster" />
+            </div>
+            <div className="var-field">
+              <label className="var-label">Firma</label>
+              <input className="form-input" type="text" value={recipientFirma} onChange={e => setRecipientFirma(e.target.value)} placeholder="Muster AG" />
+            </div>
+            <div className="var-field">
+              <label className="var-label">Website</label>
+              <input className="form-input" type="text" value={recipientWebsite} onChange={e => setRecipientWebsite(e.target.value)} placeholder="muster.ch" />
+            </div>
+            <div className="var-field">
+              <label className="var-label">Branche</label>
+              <input className="form-input" type="text" value={recipientBranche} onChange={e => setRecipientBranche(e.target.value)} placeholder="Handwerk" />
+            </div>
           </div>
           <button type="submit" className="submit-btn" disabled={isLoading}>
             {isLoading ? <><div className="spinner" />VERARBEITEN...</> : <>SENDEN ➔</>}
