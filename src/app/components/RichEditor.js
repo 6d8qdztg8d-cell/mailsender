@@ -75,8 +75,7 @@ export default function RichEditor({ value, onChange }) {
 
   const insertVariable = (label) => {
     editorRef.current?.focus();
-    const html = `<span style="background:#daff00;color:#111;padding:1px 5px;border-radius:3px;font-weight:700;font-size:0.9em">${label}</span>&nbsp;`;
-    document.execCommand('insertHTML', false, html);
+    document.execCommand('insertText', false, label);
     isUserEditing.current = true;
     if (editorRef.current && onChange) onChange(editorRef.current.innerHTML);
     isUserEditing.current = false;
